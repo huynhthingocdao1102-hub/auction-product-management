@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý sản phẩm đấu giá</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* Toàn bộ nền màu hồng pastel nhẹ nhàng */
+        body {
+            background-color: #fce4ec;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Container đổ bóng mịn màng */
+        .main-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(244, 143, 177, 0.25);
+            border: 1px solid rgba(244, 143, 177, 0.3);
+        }
+
+        /* Tiêu đề hồng đậm quý phái */
+        .title-main {
+            color: #880e4f;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* Khung tìm kiếm phong cách Glassmorphism nhẹ */
+        .search-box {
+            border: 2px solid #f8bbd0 !important;
+            background-color: #fff5f8;
+            border-radius: 16px !important;
+        }
+
+        .search-box legend {
+            color: #880e4f;
+            font-size: 1.1rem;
+        }
+
+        /* Custom các nút bấm */
+        .btn-add {
+            background: linear-gradient(135deg, #ff80ab, #f50057);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-add:hover {
+            background: linear-gradient(135deg, #f50057, #c51162);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 0, 87, 0.4);
+        }
+
+        .btn-search {
+            background-color: #c2185b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+        }
+        .btn-search:hover {
+            background-color: #880e4f;
+            color: white;
+        }
+
+        .btn-reset {
+            border: 2px solid #f8bbd0;
+            color: #c2185b;
+            background-color: white;
+        }
+        .btn-reset:hover {
+            background-color: #f8bbd0;
+            color: #880e4f;
+        }
+
+        /* Table Style chuẩn ảnh mẫu */
+        .table-custom {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f48fb1;
+        }
+        .table-custom thead {
+            background: linear-gradient(to right, #d81b60, #ad1457);
+            color: white;
+        }
+        .table-custom th {
+            font-weight: 600;
+            border-color: #f48fb1 !important;
+        }
+        .table-custom td {
+            border-color: #f8bbd0 !important;
+            font-weight: 500;
+        }
+
+        /* Checkbox màu hồng kẹo ngọt */
+        .product-checkbox {
+            border-color: #f48fb1;
+        }
+        .product-checkbox:checked {
+            background-color: #e91e63;
+            border-color: #e91e63;
+        }
+
+        /* Định dạng các Badge Tình trạng */
+        .badge-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-cho-duyet {
+            background-color: #ffe0b2;
+            color: #e65100;
+        }
+        .status-dang-dau {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+        .status-da-ban {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        /* Phân trang màu hồng */
+        .pagination .page-link {
+            color: #e91e63;
+            border-color: #f8bbd0;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #e91e63;
+            border-color: #e91e63;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5 main-card p-4 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="title-main m-0">Quản lý sản phẩm <span class="fs-4">🔨</span></h3>
+        <a th:href="@{/product/create}" class="btn btn-add btn-sm shadow-sm">
+            <i class="bi bi-box-seam-fill"></i> Thêm Sản Phẩm
+        </a>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success border-0 p-3 small text-success rounded-3 mb-3"
+         style="background-color: #e8f5e9;" th:text="${message}"></div>
+
+    <fieldset class="border p-4 mb-4 search-box shadow-sm">
+        <legend class="w-auto float-none fw-bold px-3"><i class="bi bi-search-heart-fill text-danger"></i> Tìm kiếm sản phẩm</legend>
+        <form th:action="@{/product/list}" method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-secondary">Tên sản phẩm</label>
+                <input type="text" name="searchName" th:value="${searchName}" class="form-control" placeholder="Nhập tên sản phẩm...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-secondary">Giá bắt đầu</label>
+                <input type="number" name="searchPrice" th:value="${searchPrice}" class="form-control" placeholder="0">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-secondary">Loại sản phẩm</label>
+                <select name="searchTypeId" class="form-select">
+                    <option value="0">--Chọn--</option>
+                    <option th:each="type : ${productTypes}" th:value="${type.id}" th:text="${type.name}" th:selected="${type.id == searchTypeId}"></option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <a th:href="@{/product/list}" class="btn btn-reset px-3"><i class="bi bi-arrow-clockwise"></i></a>
+                <button type="submit" class="btn btn-search w-100 fw-bold"><i class="bi bi-search"></i> Tìm kiếm</button>
+            </div>
+        </form>
+    </fieldset>
+
+    <form id="deleteForm" th:action="@{/product/delete}" method="post">
+        <table class="table table-hover table-custom align-middle text-center mb-3">
+            <thead>
+            <tr>
+                <th width="70">STT</th>
+                <th width="70">Chọn</th>
+                <th>Tên Sản Phẩm</th>
+                <th>Giá bắt đầu</th>
+                <th>Loại sản phẩm</th>
+                <th>Tình trạng</th>
+                <th width="120">Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product, loop : ${productPage.content}">
+                <td th:text="${loop.count + (currentPage * 5)}" class="text-secondary fw-bold">1</td>
+                <td>
+                    <input type="checkbox" name="selectedIds" th:value="${product.id}" class="form-check-input product-checkbox">
+                </td>
+                <td class="text-start fw-bold text-dark" th:text="${product.name}">Tên sản phẩm</td>
+                <td class="fw-bold text-end pe-4 text-secondary" th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')} + ' VND'">0 VND</td>
+                <td th:text="${product.productType != null ? product.productType.name : 'N/A'}">Loại</td>
+                <td>
+                    <span th:text="${product.status}"
+                          th:classappend="${product.status == 'Chờ duyệt' ? 'status-cho-duyet' : (product.status == 'Đang đấu giá' ? 'status-dang-dau' : 'status-da-ban')}"
+                          class="badge-status">
+                    </span>
+                </td>
+                <td>
+                    <a th:href="@{/product/edit(id=${product.id})}" class="btn btn-link btn-sm fw-bold text-decoration-none" style="color: #c2185b;">
+                        <i class="bi bi-pencil-square"></i> Sửa
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${productPage.isEmpty()}">
+                <td colspan="7" class="text-center text-muted py-4">Không tìm thấy sản phẩm nào phù hợp!</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <button type="button" class="btn btn-danger btn-sm px-4 fw-bold mb-3 shadow-sm" style="border-radius: 8px;" onclick="confirmMultipleDelete()">
+            <i class="bi bi-trash3-fill"></i> Xóa hàng loạt
+        </button>
+    </form>
+
+    <nav th:if="${productPage.totalPages > 1}">
+        <ul class="pagination pagination-sm m-0">
+            <li class="page-item" th:classappend="${!productPage.hasPrevious()} ? 'disabled'">
+                <a class="page-link" th:href="@{/product/list(page=${currentPage - 1}, searchName=${searchName}, searchPrice=${searchPrice}, searchTypeId=${searchTypeId})}">&laquo;</a>
+            </li>
+
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link fw-bold" th:text="${i + 1}" th:href="@{/product/list(page=${i}, searchName=${searchName}, searchPrice=${searchPrice}, searchTypeId=${searchTypeId})}">1</a>
+            </li>
+
+            <li class="page-item" th:classappend="${!productPage.hasNext()} ? 'disabled'">
+                <a class="page-link" th:href="@{/product/list(page=${currentPage + 1}, searchName=${searchName}, searchPrice=${searchPrice}, searchTypeId=${searchTypeId})}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<script>
+    function confirmMultipleDelete() {
+        const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+        if (checkboxes.length === 0) {
+            alert("Vui lòng tích chọn các sản phẩm cần xóa ở cột Chọn!");
+            return;
+        }
+
+        if (confirm("Bạn có muốn xóa tất cả sản phẩm đã chọn?")) {
+            document.getElementById('deleteForm').submit();
+        }
+    }
+</script>
+</body>
+</html>
